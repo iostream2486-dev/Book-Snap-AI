@@ -80,8 +80,3 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log("SnapStudy backend running on", port);
 });
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log("SnapStudy backend running on", port);
-});
