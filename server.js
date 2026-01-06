@@ -102,12 +102,11 @@ if (!outputText) {
 
 res.json({ text: outputText });
 
-return res.json({
+  res.json({
   result: outputText,
   text: outputText,
   message: outputText,
   success: true
-  debug: data
 });
 
   } catch (err) {
