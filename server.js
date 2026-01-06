@@ -53,15 +53,27 @@ const response = await fetch("https://api.openai.com/v1/responses", {
 
 const data = await response.json();
 
-let outputText = data?.output_text;
+let outputText = "";
 
-if (!outputText) {
-  console.error("OpenAI raw response:", JSON.stringify(data, null, 2));
-  return res.status(500).json({
-    error: "OpenAI ha risposto ma senza testo leggibile"
-  });
+if (
+  data.output &&
+  data.output[0] &&
+  data.output[0].content &&
+  data.output[0].content[0] &&
+  data.output[0].content[0].text
+) {
+  outputText = data.output[0].content[0].text;
+}
+else if (data.output_text) {
+  outputText = data.output_text;
 }
 
+else {
+  console.error("OpenAI RAW RESPONSE:", JSON.stringify(data, null, 2));
+  return res.status(500).json({
+    error: "OpenAI ha risposto ma il testo non è stato trovato"
+  });
+}
 res.json({ text: outputText });
 
 
