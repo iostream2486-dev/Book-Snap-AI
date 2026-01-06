@@ -1,7 +1,7 @@
-const express = require("express");
-const fetch = require("node-fetch");
-const cors = require("cors");
-const vision = require("@google-cloud/vision");
+import express from "express";
+import fetch from "node-fetch";
+import cors from "cors";
+import vision from "@google-cloud/vision";
 
 const app = express();
 
@@ -74,6 +74,11 @@ app.post("/api/ai", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log("SnapStudy backend running on", port);
 });
 
 const port = process.env.PORT || 3000;
