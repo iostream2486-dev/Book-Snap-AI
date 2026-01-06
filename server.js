@@ -39,33 +39,31 @@ app.post("/api/ai", async (req, res) => {
       prompt += `Traduci il testo in ${language || "Italiano"}.`;
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + process.env.OPENAI_API_KEY
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.3
-      })
-    });
+const response = await fetch("https://api.openai.com/v1/responses", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + process.env.OPENAI_API_KEY
+  },
+  body: JSON.stringify({
+    model: "gpt-4.1-mini",
+    input: prompt
+  })
+});
 
-    const data = await response.json();
+const data = await response.json();
 
-    const outputText =
-      data?.choices?.[0]?.message?.content ??
-      data?.output_text ??
-      null;
+let outputText = data?.output_text;
 
-    if (!outputText) {
-      return res.status(500).json({
-        error: "OpenAI ha risposto ma senza testo leggibile"
-      });
-    }
+if (!outputText) {
+  console.error("OpenAI raw response:", JSON.stringify(data, null, 2));
+  return res.status(500).json({
+    error: "OpenAI ha risposto ma senza testo leggibile"
+  });
+}
 
-    res.json({ text: outputText });
+res.json({ text: outputText });
+
 
   } catch (err) {
     console.error(err);
