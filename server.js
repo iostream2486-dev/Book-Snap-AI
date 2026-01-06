@@ -78,16 +78,11 @@ app.post("/api/ai", async (req, res) => {
 
     const data = await response.json();
 
-    const outputText = extractText(data).trim();
+   console.log("OPENAI RAW RESPONSE >>>", JSON.stringify(data, null, 2));
 
-    if (!outputText) {
-      console.error("OPENAI RAW RESPONSE:", JSON.stringify(data, null, 2));
-      return res.status(500).json({
-        error: "OpenAI ha risposto ma senza testo utilizzabile"
-      });
-    }
-
-    res.json({ text: outputText });
+return res.json({
+  debug: data
+});
 
   } catch (err) {
     console.error("SERVER ERROR:", err);
