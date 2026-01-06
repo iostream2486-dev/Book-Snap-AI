@@ -78,8 +78,29 @@ app.post("/api/ai", async (req, res) => {
     });
 
     const data = await response.json();
+let outputText = "";
 
-   console.log("OPENAI RAW RESPONSE >>>", JSON.stringify(data, null, 2));
+if (
+  data.output &&
+  data.output[0] &&
+  data.output[0].content
+) {
+  for (const block of data.output[0].content) {
+    if (block.type === "output_text" && block.text) {
+      outputText += block.text + "\n";
+    }
+  }
+}
+
+outputText = outputText.trim();
+
+if (!outputText) {
+  return res.status(500).json({
+    error: "Testo AI non trovato"
+  });
+}
+
+res.json({ text: outputText });
 
 return res.json({
   debug: data
