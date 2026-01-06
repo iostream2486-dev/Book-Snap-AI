@@ -32,7 +32,28 @@ app.post("/api/ai", async (req, res) => {
     error: "OpenAI ha restituito una risposta non valida"
   });
 }
-    res.json({ text: data.choices[0].message.content });
+    let outputText = "";
+
+
+if (data.choices && data.choices[0]?.message?.content) {
+  outputText = data.choices[0].message.content;
+}
+
+
+else if (data.output_text) {
+  outputText = data.output_text;
+}
+
+
+else {
+  console.error("OpenAI raw response:", JSON.stringify(data, null, 2));
+  return res.status(500).json({
+    error: "OpenAI ha risposto ma senza testo leggibile"
+  });
+}
+
+res.json({ text: outputText });
+);
 
   } catch (err) {
     res.status(500).json({ error: err.message });
