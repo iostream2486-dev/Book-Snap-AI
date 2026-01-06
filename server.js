@@ -10,6 +10,26 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 const visionClient = new ImageAnnotatorClient();
 
+function extractText(obj) {
+  let text = "";
+
+  if (typeof obj === "string") {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    for (const item of obj) {
+      text += extractText(item) + "\n";
+    }
+  } else if (typeof obj === "object" && obj !== null) {
+    for (const key in obj) {
+      text += extractText(obj[key]) + "\n";
+    }
+  }
+
+  return text;
+}
+
 app.post("/api/ai", async (req, res) => {
   try {
     const { images, action, language } = req.body;
@@ -24,7 +44,10 @@ app.post("/api/ai", async (req, res) => {
       const [result] = await visionClient.textDetection({
         image: { content: base64 }
       });
-      fullText += "\n" + (result.fullTextAnnotation?.text || "");
+
+      if (result.fullTextAnnotation?.text) {
+        fullText += "\n" + result.fullTextAnnotation.text;
+      }
     }
 
     if (!fullText.trim()) {
@@ -34,51 +57,40 @@ app.post("/api/ai", async (req, res) => {
     let prompt = fullText.trim() + "\n\n";
 
     if (action === "summary") {
-      prompt += "Crea un riassunto chiaro e conciso.";
+      prompt += "Crea un riassunto chiaro, strutturato e conciso.";
     } else if (action === "translation") {
       prompt += `Traduci il testo in ${language || "Italiano"}.`;
+    } else {
+      prompt += "Elabora il testo in modo chiaro.";
     }
 
-const response = await fetch("https://api.openai.com/v1/responses", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "Authorization": "Bearer " + process.env.OPENAI_API_KEY
-  },
-  body: JSON.stringify({
-    model: "gpt-4.1-mini",
-    input: prompt
-  })
-});
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + process.env.OPENAI_API_KEY
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1-mini",
+        input: prompt
+      })
+    });
 
-const data = await response.json();
+    const data = await response.json();
 
-let outputText = "";
+    const outputText = extractText(data).trim();
 
-if (
-  data.output &&
-  data.output[0] &&
-  data.output[0].content &&
-  data.output[0].content[0] &&
-  data.output[0].content[0].text
-) {
-  outputText = data.output[0].content[0].text;
-}
-else if (data.output_text) {
-  outputText = data.output_text;
-}
+    if (!outputText) {
+      console.error("OPENAI RAW RESPONSE:", JSON.stringify(data, null, 2));
+      return res.status(500).json({
+        error: "OpenAI ha risposto ma senza testo utilizzabile"
+      });
+    }
 
-else {
-  console.error("OpenAI RAW RESPONSE:", JSON.stringify(data, null, 2));
-  return res.status(500).json({
-    error: "OpenAI ha risposto ma il testo non è stato trovato"
-  });
-}
-res.json({ text: outputText });
-
+    res.json({ text: outputText });
 
   } catch (err) {
-    console.error(err);
+    console.error("SERVER ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 });
