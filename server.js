@@ -9,6 +9,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 const visionClient = new ImageAnnotatorClient();
+console.log("OPENAI_API_KEY =", process.env.OPENAI_API_KEY);
 
 function extractText(obj) {
   let text = "";
