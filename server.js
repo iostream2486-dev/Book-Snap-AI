@@ -94,7 +94,7 @@ app.post("/api/ai", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
+console.log("OPENAI KEY PRESENTE?", !!process.env.OPENAI_API_KEY);
 const PORT_NUMBER = process.env.PORT || 3000;
 app.listen(PORT_NUMBER, () => {
   console.log("SnapStudy backend running on", PORT_NUMBER);
