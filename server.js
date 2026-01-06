@@ -25,6 +25,12 @@ app.post("/api/ai", async (req, res) => {
     });
 
     const data = await response.json();
+    if (!data.choices || !data.choices.length) {
+    console.error("OpenAI raw response:", data);
+    return res.status(500).json({
+    error: "OpenAI ha restituito una risposta non valida"
+  });
+}
     res.json({ text: data.choices[0].message.content });
 
   } catch (err) {
