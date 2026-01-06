@@ -103,6 +103,10 @@ if (!outputText) {
 res.json({ text: outputText });
 
 return res.json({
+  result: outputText,
+  text: outputText,
+  message: outputText,
+  success: true
   debug: data
 });
 
