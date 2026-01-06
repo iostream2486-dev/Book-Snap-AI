@@ -78,44 +78,34 @@ app.post("/api/ai", async (req, res) => {
     });
 
     const data = await response.json();
-let outputText = "";
 
-if (
-  data.output &&
-  data.output[0] &&
-  data.output[0].content
-) {
-  for (const block of data.output[0].content) {
-    if (block.type === "output_text" && block.text) {
-      outputText += block.text + "\n";
+    let outputText = "";
+
+    if (data.output && data.output[0] && data.output[0].content) {
+      for (const block of data.output[0].content) {
+        if (block.type === "output_text" && block.text) {
+          outputText += block.text + "\n";
+        }
+      }
     }
-  }
-}
 
-outputText = outputText.trim();
+    outputText = outputText.trim();
 
-if (!outputText) {
-  return res.status(500).json({
-    error: "Testo AI non trovato"
-  });
-}
+    if (!outputText) {
+      console.error("OPENAI RAW RESPONSE:", JSON.stringify(data, null, 2));
+      return res.status(500).json({ error: "Testo AI non trovato" });
+    }
 
-res.json({ text: outputText });
-
-  res.json({
-  result: outputText,
-  text: outputText,
-  message: outputText,
-  success: true
-});
+  
+    return res.json({
+      success: true,
+      text: outputText,
+      result: outputText,
+      message: outputText
+    });
 
   } catch (err) {
     console.error("SERVER ERROR:", err);
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
-});
-console.log("OPENAI KEY PRESENTE?", !!process.env.OPENAI_API_KEY);
-const PORT_NUMBER = process.env.PORT || 3000;
-app.listen(PORT_NUMBER, () => {
-  console.log("SnapStudy backend running on", PORT_NUMBER);
 });
