@@ -1,7 +1,6 @@
 import express from "express";
-import fetch from "node-fetch";
 import cors from "cors";
-import vision from "@google-cloud/vision";
+import { ImageAnnotatorClient } vision from "@google-cloud/vision";
 
 const app = express();
 
